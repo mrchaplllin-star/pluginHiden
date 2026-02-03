@@ -59,7 +59,7 @@ public class HidenCommand implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        Msg.send(sender, "&e/hiden join <arena> [team <hiden|speaker>] &7- приєднатись");
+        Msg.send(sender, "&e/hiden join <arena> [team <hiden|speaker>] &7- приєднатись (Hiden/Seek)");
         Msg.send(sender, "&e/hiden leave &7- вийти");
         Msg.send(sender, "&e/hiden stats [гравець] &7- статистика");
         Msg.send(sender, "&e/hiden achievements &7- досягнення");
@@ -357,10 +357,10 @@ public class HidenCommand implements CommandExecutor {
             String role = args[3].toLowerCase(Locale.ROOT);
             if (role.equals("hiden")) {
                 plugin.getGameManager().assignHider(arena, player);
-                Msg.send(sender, "&aТи граєш за &fХОВАНКУ");
+                Msg.send(sender, "&aТи граєш за &fHiden");
             } else if (role.equals("speaker")) {
                 plugin.getGameManager().assignSeeker(arena, player);
-                Msg.send(sender, "&cТи граєш за &fШУКАЧА");
+                Msg.send(sender, "&cТи граєш за &fSeek");
             } else {
                 Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
                 return;
@@ -445,9 +445,9 @@ public class HidenCommand implements CommandExecutor {
         }
         PlayerStats stats = plugin.getStatsManager().getStats(target.getUniqueId());
         Msg.send(sender, "&eСтатистика: &f" + target.getName());
-        Msg.send(sender, "&7Ховальник перемог: &f" + stats.getHiderWins());
-        Msg.send(sender, "&7Шукач перемог: &f" + stats.getSeekerWins());
-        Msg.send(sender, "&7Знайдено ховальників: &f" + stats.getHunterKills());
+        Msg.send(sender, "&7Перемог Hiden: &f" + stats.getHiderWins());
+        Msg.send(sender, "&7Перемог Seek: &f" + stats.getSeekerWins());
+        Msg.send(sender, "&7Знайдено Hiden: &f" + stats.getHunterKills());
         Msg.send(sender, "&7Вижито ігор: &f" + stats.getSurvivorGames());
     }
 

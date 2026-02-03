@@ -148,7 +148,7 @@ public class MenuListener implements Listener {
             case 24 -> {
                 menuManager.setPendingInput(player, new PendingInput(InputType.SEEKERS_PERCENT, arena.getName()));
                 player.closeInventory();
-                Msg.send(player, "&eВведи новий відсоток шукачів у чат.");
+                Msg.send(player, "&eВведи новий відсоток Seek у чат.");
                 Msg.send(player, "&7Напиши &ccancel&7 для скасування.");
             }
             case 26 -> {

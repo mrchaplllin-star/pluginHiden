@@ -8,6 +8,7 @@ import com.yourname.hiden.stats.PlayerStats;
 import com.yourname.hiden.stats.StatsManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import com.yourname.hiden.util.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -69,7 +70,7 @@ public class GameManager {
             return false;
         }
         if (arena.getWaitingLoc() == null || arena.getHidenLoc() == null || arena.getSpeakerLoc() == null) {
-            lastError = "&cНе всі точки телепортації встановлені!";
+            lastError = "&cНе всі варпи налаштовані!";
             return false;
         }
         int minPlayers = arena.getMinPlayers() > 0 ? arena.getMinPlayers() : plugin.getConfig().getInt("default_min_players", 2);
@@ -106,11 +107,11 @@ public class GameManager {
 
         if (manualTeams) {
             if (arena.getHiders().size() < requiredHiders) {
-                lastError = "&cНедостатньо ховальників для старту.";
+                lastError = "&cНедостатньо гравців Hiden для старту.";
                 return false;
             }
             if (arena.getSeekers().size() < requiredSeekers) {
-                lastError = "&cНедостатньо шукачів для старту.";
+                lastError = "&cНедостатньо гравців Seek для старту.";
                 return false;
             }
             arena.getHiders().addAll(unassigned);
@@ -215,7 +216,7 @@ public class GameManager {
         arena.clearBossBar();
         Location waiting = arena.getWaitingLoc();
 
-        String title = seekersWin ? "&cПеремогли шукачі!" : "&aПеремогли ховальники!";
+        String title = seekersWin ? "&cПеремогли Seek!" : "&aПеремогли Hiden!";
         broadcastToArena(arena, title + " &7(" + arena.getDisplayName() + ")");
 
         if (waiting != null) {
@@ -415,10 +416,10 @@ public class GameManager {
                 team = scoreboard.registerNewTeam(name);
             }
             if (hiden) {
-                team.prefix(Component.text("[HIDEN] ").color(NamedTextColor.GREEN));
+                team.prefix(Component.text("[HIDEN] ").color(NamedTextColor.GREEN).decorate(TextDecoration.BOLD));
                 team.color(NamedTextColor.GREEN);
             } else {
-                team.prefix(Component.text("[SPEAKER] ").color(NamedTextColor.RED));
+                team.prefix(Component.text("[SEEK] ").color(NamedTextColor.RED).decorate(TextDecoration.BOLD));
                 team.color(NamedTextColor.RED);
             }
             map.put(key, team);

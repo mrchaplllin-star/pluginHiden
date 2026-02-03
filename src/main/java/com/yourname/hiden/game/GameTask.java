@@ -57,7 +57,7 @@ public class GameTask extends BukkitRunnable {
                 bossBar.addPlayer(player);
             }
         }
-        manager.broadcastToArena(arena, "&eПочаток підготовки! Шукачі заморожені.");
+        manager.broadcastToArena(arena, "&eПочаток підготовки! Seek заморожені.");
     }
 
     private void startPlaying() {
@@ -71,7 +71,7 @@ public class GameTask extends BukkitRunnable {
                 player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
                 player.setGameMode(GameMode.SURVIVAL);
                 player.teleport(arena.getSpeakerLoc());
-                Msg.send(player, "&cТи шукач! Шукаєш ховальників.");
+                Msg.send(player, "&cТи Seek! Шукаєш Hiden.");
             }
         }
         for (UUID uuid : arena.getHiders()) {
@@ -82,7 +82,7 @@ public class GameTask extends BukkitRunnable {
                 if (safe != null) {
                     player.teleport(safe);
                 }
-                Msg.send(player, "&aТи ховальник! Ховайся.");
+                Msg.send(player, "&aТи Hiden! Ховайся.");
                 hiderGlow.put(uuid, false);
             }
         }
@@ -101,13 +101,19 @@ public class GameTask extends BukkitRunnable {
     private void handlePrep() {
         BossBar bossBar = arena.getBossBar();
         double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getPrepTime()));
-        bossBar.setTitle(Msg.colorizeText("&eПідготовка: &f" + (remainingTicks / 20) + "с"));
+        bossBar.setTitle(Msg.colorizeText("&eПідготовка: &f" + Msg.formatTimeUA(remainingTicks)));
         bossBar.setProgress(progress);
         for (UUID uuid : arena.getSeekers()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 255, false, false, false));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255, false, false, false));
+            }
+        }
+        for (UUID uuid : arena.getParticipants()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                Msg.actionBarRaw(player, "&c&lПідготовка: &f" + Msg.formatTimeUA(remainingTicks));
             }
         }
         remainingTicks -= 20;
@@ -119,11 +125,18 @@ public class GameTask extends BukkitRunnable {
     private void handlePlaying() {
         BossBar bossBar = arena.getBossBar();
         double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getTimeGames()));
-        bossBar.setTitle(Msg.colorizeText("&aГра: &f" + (remainingTicks / 20) + "с"));
+        bossBar.setTitle(Msg.colorizeText("&aГра: &f" + Msg.formatTimeUA(remainingTicks)));
         bossBar.setProgress(progress);
 
         elapsedPlayingTicks += 20;
         chickenSoundTicks += 20;
+
+        for (UUID uuid : arena.getParticipants()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                Msg.actionBarRaw(player, "&9&lЧас гри: &f" + Msg.formatTimeUA(remainingTicks));
+            }
+        }
 
         int timeSeek = arena.getTimeSeek();
         if (timeSeek > 0 && elapsedPlayingTicks % timeSeek == 0) {

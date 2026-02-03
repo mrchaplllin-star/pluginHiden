@@ -27,4 +27,15 @@ public class Msg {
     public static void actionBar(Player player, String message) {
         player.sendActionBar(colorize(PREFIX + message));
     }
+
+    public static void actionBarRaw(Player player, String message) {
+        player.sendActionBar(colorize(message));
+    }
+
+    public static String formatTimeUA(int ticks) {
+        int totalSeconds = Math.max(0, ticks / 20);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return minutes + " хв. " + String.format("%02d", seconds) + " с.";
+    }
 }
