@@ -49,7 +49,7 @@ public class GameTask extends BukkitRunnable {
     private void startPrep() {
         arena.setState(GameState.PREP);
         BossBar bossBar = arena.getBossBar();
-        bossBar.setTitle(Msg.colorize("&eПідготовка"));
+        bossBar.setTitle(Msg.colorizeText("&eПідготовка"));
         bossBar.setProgress(1.0);
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
@@ -101,12 +101,12 @@ public class GameTask extends BukkitRunnable {
     private void handlePrep() {
         BossBar bossBar = arena.getBossBar();
         double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getPrepTime()));
-        bossBar.setTitle(Msg.colorize("&eПідготовка: &f" + (remainingTicks / 20) + "с"));
+        bossBar.setTitle(Msg.colorizeText("&eПідготовка: &f" + (remainingTicks / 20) + "с"));
         bossBar.setProgress(progress);
         for (UUID uuid : arena.getSeekers()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 40, 255, false, false, false));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 255, false, false, false));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255, false, false, false));
             }
         }
@@ -119,7 +119,7 @@ public class GameTask extends BukkitRunnable {
     private void handlePlaying() {
         BossBar bossBar = arena.getBossBar();
         double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getTimeGames()));
-        bossBar.setTitle(Msg.colorize("&aГра: &f" + (remainingTicks / 20) + "с"));
+        bossBar.setTitle(Msg.colorizeText("&aГра: &f" + (remainingTicks / 20) + "с"));
         bossBar.setProgress(progress);
 
         elapsedPlayingTicks += 20;
