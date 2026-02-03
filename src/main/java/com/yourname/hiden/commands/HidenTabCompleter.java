@@ -27,6 +27,7 @@ public class HidenTabCompleter implements TabCompleter {
             suggestions.add("spectate");
             suggestions.add("achievements");
             suggestions.add("leaderboard");
+            suggestions.add("menu");
             if (sender.hasPermission("hiden.admin")) {
                 suggestions.add("create");
                 suggestions.add("remove");

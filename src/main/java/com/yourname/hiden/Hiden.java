@@ -4,6 +4,8 @@ import com.yourname.hiden.arena.ArenaManager;
 import com.yourname.hiden.commands.HidenCommand;
 import com.yourname.hiden.commands.HidenTabCompleter;
 import com.yourname.hiden.game.GameManager;
+import com.yourname.hiden.gui.MenuListener;
+import com.yourname.hiden.gui.MenuManager;
 import com.yourname.hiden.listeners.GameListener;
 import com.yourname.hiden.stats.StatsManager;
 import org.bukkit.Bukkit;
@@ -13,6 +15,7 @@ public class Hiden extends JavaPlugin {
     private ArenaManager arenaManager;
     private StatsManager statsManager;
     private GameManager gameManager;
+    private MenuManager menuManager;
 
     @Override
     public void onEnable() {
@@ -26,6 +29,7 @@ public class Hiden extends JavaPlugin {
         arenaManager = new ArenaManager(this);
         statsManager = new StatsManager(this);
         gameManager = new GameManager(this, arenaManager, statsManager);
+        menuManager = new MenuManager(this);
 
         HidenCommand command = new HidenCommand(this);
         if (getCommand("hiden") != null) {
@@ -34,6 +38,7 @@ public class Hiden extends JavaPlugin {
         }
 
         Bukkit.getPluginManager().registerEvents(new GameListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new MenuListener(this, menuManager), this);
 
         long autosaveTicks = getConfig().getLong("autosave_ticks", 6000);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
@@ -59,5 +64,9 @@ public class Hiden extends JavaPlugin {
 
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    public MenuManager getMenuManager() {
+        return menuManager;
     }
 }

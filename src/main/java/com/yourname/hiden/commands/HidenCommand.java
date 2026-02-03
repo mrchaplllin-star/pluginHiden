@@ -52,6 +52,7 @@ public class HidenCommand implements CommandExecutor {
             case "achievements" -> handleAchievements(sender, args);
             case "leaderboard" -> handleLeaderboard(sender, args);
             case "ach" -> handleGrantAchievement(sender, args);
+            case "menu" -> handleMenu(sender);
             default -> sendHelp(sender);
         }
         return true;
@@ -63,6 +64,7 @@ public class HidenCommand implements CommandExecutor {
         Msg.send(sender, "&e/hiden stats [гравець] &7- статистика");
         Msg.send(sender, "&e/hiden achievements &7- досягнення");
         Msg.send(sender, "&e/hiden leaderboard [hider|seeker|total] &7- топ-10");
+        Msg.send(sender, "&e/hiden menu &7- меню");
         if (sender.hasPermission("hiden.admin")) {
             Msg.send(sender, "&6Адмін: create/remove/arena/start/list/tp/ach");
         }
@@ -327,7 +329,7 @@ public class HidenCommand implements CommandExecutor {
         }
         Arena arena = plugin.getArenaManager().getArena(args[1]);
         if (arena == null) {
-            Msg.send(sender, "&cArena does not exist!");
+            Msg.send(sender, "&cАрена не існує!");
             return;
         }
         if (!isPlayerInArenaWorld(player, arena) && !player.hasPermission("hiden.admin")) {
@@ -335,7 +337,7 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
-            Msg.send(sender, "&cGame already started!");
+            Msg.send(sender, "&cГра вже запущена!");
             return;
         }
         boolean alreadyParticipant = arena.getParticipants().contains(player.getUniqueId());
@@ -354,8 +356,10 @@ public class HidenCommand implements CommandExecutor {
             String role = args[3].toLowerCase(Locale.ROOT);
             if (role.equals("hiden")) {
                 plugin.getGameManager().assignHider(arena, player);
+                Msg.send(sender, "&aТи граєш за &fХОВАНКУ");
             } else if (role.equals("speaker")) {
                 plugin.getGameManager().assignSeeker(arena, player);
+                Msg.send(sender, "&cТи граєш за &fШУКАЧА");
             } else {
                 Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
                 return;
@@ -365,7 +369,19 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         plugin.getArenaManager().save();
-        Msg.send(sender, "&aВи приєдналися до арени &f" + arena.getDisplayName());
+        Msg.send(sender, "&aТи приєднався до арени &f" + arena.getDisplayName());
+    }
+
+    private void handleMenu(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            Msg.send(sender, "&cТільки для гравця.");
+            return;
+        }
+        if (sender.hasPermission("hiden.admin")) {
+            plugin.getMenuManager().openMainMenu(player);
+        } else {
+            plugin.getMenuManager().openPlayerMenu(player);
+        }
     }
 
     private void handleLeave(CommandSender sender, String[] args) {

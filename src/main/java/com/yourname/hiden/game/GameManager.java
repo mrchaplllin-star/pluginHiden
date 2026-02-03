@@ -69,7 +69,7 @@ public class GameManager {
             return false;
         }
         if (arena.getWaitingLoc() == null || arena.getHidenLoc() == null || arena.getSpeakerLoc() == null) {
-            lastError = "&cВарпи не встановлені.";
+            lastError = "&cНе всі точки телепортації встановлені!";
             return false;
         }
         if (arena.getParticipants().size() < requiredHiders) {
