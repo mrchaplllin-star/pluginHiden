@@ -69,6 +69,10 @@ public class HidenTabCompleter implements TabCompleter {
         }
         if (args.length == 3) {
             String sub = args[0].toLowerCase(Locale.ROOT);
+            if (sub.equals("join")) {
+                suggestions.add("hiden");
+                suggestions.add("speaker");
+            }
             if (sub.equals("arena")) {
                 suggestions.add("setwarp");
                 suggestions.add("removewarp");

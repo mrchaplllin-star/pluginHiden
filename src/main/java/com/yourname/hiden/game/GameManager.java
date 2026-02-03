@@ -60,21 +60,30 @@ public class GameManager {
         if (arena.getParticipants().size() < plugin.getConfig().getInt("hiders_min")) {
             return false;
         }
-        arena.getSeekers().clear();
-        arena.getHiders().clear();
         List<UUID> shuffled = new ArrayList<>(arena.getParticipants());
         java.util.Collections.shuffle(shuffled);
         int seekersCount = Math.max(plugin.getConfig().getInt("seekers_min"),
                 (int) Math.ceil(shuffled.size() * (arena.getSeekersPercent() / 100.0)));
         seekersCount = Math.min(seekersCount, shuffled.size() - 1);
-        for (int i = 0; i < shuffled.size(); i++) {
-            UUID uuid = shuffled.get(i);
-            if (i < seekersCount) {
-                arena.getSeekers().add(uuid);
-            } else {
-                arena.getHiders().add(uuid);
-            }
+        Set<UUID> presetSeekers = new java.util.HashSet<>(arena.getSeekers());
+        Set<UUID> presetHiders = new java.util.HashSet<>(arena.getHiders());
+        presetSeekers.retainAll(arena.getParticipants());
+        presetHiders.retainAll(arena.getParticipants());
+        presetHiders.removeAll(presetSeekers);
+
+        arena.getSeekers().clear();
+        arena.getHiders().clear();
+        arena.getSeekers().addAll(presetSeekers);
+        arena.getHiders().addAll(presetHiders);
+
+        List<UUID> unassigned = new ArrayList<>(shuffled);
+        unassigned.removeAll(arena.getSeekers());
+        unassigned.removeAll(arena.getHiders());
+
+        while (arena.getSeekers().size() < seekersCount && !unassigned.isEmpty()) {
+            arena.getSeekers().add(unassigned.remove(0));
         }
+        arena.getHiders().addAll(unassigned);
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {

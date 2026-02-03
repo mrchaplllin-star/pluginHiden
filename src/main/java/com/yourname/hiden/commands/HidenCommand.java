@@ -313,7 +313,7 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         if (args.length < 2) {
-            Msg.send(sender, "&cВикористання: /hiden join <arena>");
+            Msg.send(sender, "&cВикористання: /hiden join <arena> [hiden|speaker]");
             return;
         }
         Arena arena = plugin.getArenaManager().getArena(args[1]);
@@ -330,6 +330,16 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         arena.getParticipants().add(player.getUniqueId());
+        if (args.length >= 3) {
+            String role = args[2].toLowerCase(Locale.ROOT);
+            if (role.equals("hiden")) {
+                arena.getHiders().add(player.getUniqueId());
+                arena.getSeekers().remove(player.getUniqueId());
+            } else if (role.equals("speaker")) {
+                arena.getSeekers().add(player.getUniqueId());
+                arena.getHiders().remove(player.getUniqueId());
+            }
+        }
         plugin.getArenaManager().save();
         Msg.send(sender, "&aВи приєдналися до арени &f" + arena.getDisplayName());
     }
