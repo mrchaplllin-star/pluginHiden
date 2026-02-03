@@ -50,6 +50,8 @@ public class ArenaManager {
             arena.setTimeGames(arenaSection.getInt("timeGames"));
             arena.setTimeSeek(arenaSection.getInt("timeSeek"));
             arena.setSeekersPercent(arenaSection.getInt("seekersPercent"));
+            arena.setHidersMin(arenaSection.getInt("hidersMin"));
+            arena.setSeekersMin(arenaSection.getInt("seekersMin"));
             Location waiting = LocUtil.deserialize(arenaSection.getString("waitingLoc"));
             Location hiden = LocUtil.deserialize(arenaSection.getString("hidenLoc"));
             Location speaker = LocUtil.deserialize(arenaSection.getString("speakerLoc"));
@@ -71,6 +73,8 @@ public class ArenaManager {
             config.set(path + ".timeGames", arena.getTimeGames());
             config.set(path + ".timeSeek", arena.getTimeSeek());
             config.set(path + ".seekersPercent", arena.getSeekersPercent());
+            config.set(path + ".hidersMin", arena.getHidersMin());
+            config.set(path + ".seekersMin", arena.getSeekersMin());
             config.set(path + ".waitingLoc", LocUtil.serialize(arena.getWaitingLoc()));
             config.set(path + ".hidenLoc", LocUtil.serialize(arena.getHidenLoc()));
             config.set(path + ".speakerLoc", LocUtil.serialize(arena.getSpeakerLoc()));

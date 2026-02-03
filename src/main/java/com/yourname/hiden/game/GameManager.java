@@ -62,6 +62,8 @@ public class GameManager {
             lastError = "&cАрена не знайдена.";
             return false;
         }
+        int requiredHiders = arena.getHidersMin() > 0 ? arena.getHidersMin() : plugin.getConfig().getInt("hiders_min");
+        int requiredSeekers = arena.getSeekersMin() > 0 ? arena.getSeekersMin() : plugin.getConfig().getInt("seekers_min");
         if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
             lastError = "&cГра вже запущена.";
             return false;
@@ -70,13 +72,13 @@ public class GameManager {
             lastError = "&cВарпи не встановлені.";
             return false;
         }
-        if (arena.getParticipants().size() < plugin.getConfig().getInt("hiders_min")) {
+        if (arena.getParticipants().size() < requiredHiders) {
             lastError = "&cНедостатньо гравців для старту.";
             return false;
         }
         List<UUID> shuffled = new ArrayList<>(arena.getParticipants());
         java.util.Collections.shuffle(shuffled);
-        int seekersCount = Math.max(plugin.getConfig().getInt("seekers_min"),
+        int seekersCount = Math.max(requiredSeekers,
                 (int) Math.ceil(shuffled.size() * (arena.getSeekersPercent() / 100.0)));
         seekersCount = Math.min(seekersCount, shuffled.size() - 1);
         boolean manualTeams = !arena.getSeekers().isEmpty() || !arena.getHiders().isEmpty();
@@ -96,11 +98,11 @@ public class GameManager {
         unassigned.removeAll(arena.getHiders());
 
         if (manualTeams) {
-            if (arena.getHiders().size() < plugin.getConfig().getInt("hiders_min")) {
+            if (arena.getHiders().size() < requiredHiders) {
                 lastError = "&cНедостатньо ховальників для старту.";
                 return false;
             }
-            if (arena.getSeekers().size() < plugin.getConfig().getInt("seekers_min")) {
+            if (arena.getSeekers().size() < requiredSeekers) {
                 lastError = "&cНедостатньо шукачів для старту.";
                 return false;
             }

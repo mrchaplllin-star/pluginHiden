@@ -88,6 +88,8 @@ public class HidenCommand implements CommandExecutor {
         arena.setPrepTime(plugin.getConfig().getInt("default_prep_time"));
         arena.setTimeSeek(plugin.getConfig().getInt("default_timeseek"));
         arena.setSeekersPercent(plugin.getConfig().getInt("default_seekers_percent"));
+        arena.setHidersMin(plugin.getConfig().getInt("hiders_min"));
+        arena.setSeekersMin(plugin.getConfig().getInt("seekers_min"));
         plugin.getArenaManager().save();
         Msg.send(sender, "&aАрена створена: &f" + name);
     }
@@ -183,7 +185,7 @@ public class HidenCommand implements CommandExecutor {
 
     private void handleSettings(CommandSender sender, Arena arena, String[] args) {
         if (args.length < 4) {
-            Msg.send(sender, "&cВикористання: /hiden arena <name> setting prep_time=<ticks> timegames=<ticks> timewaiting=<ticks> seekers_percent=<1-50> timeseek=<ticks>");
+            Msg.send(sender, "&cВикористання: /hiden arena <name> setting prep_time=<ticks> timegames=<ticks> timewaiting=<ticks> seekers_percent=<1-50> timeseek=<ticks> hiders_min=<n> seekers_min=<n>");
             return;
         }
         for (int i = 3; i < args.length; i++) {
@@ -201,6 +203,8 @@ public class HidenCommand implements CommandExecutor {
                     case "timewaiting" -> arena.setTimeWaiting(intValue);
                     case "seekers_percent" -> arena.setSeekersPercent(Math.max(1, Math.min(50, intValue)));
                     case "timeseek" -> arena.setTimeSeek(intValue);
+                    case "hiders_min" -> arena.setHidersMin(Math.max(1, intValue));
+                    case "seekers_min" -> arena.setSeekersMin(Math.max(1, intValue));
                     default -> {
                     }
                 }

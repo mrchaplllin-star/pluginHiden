@@ -25,6 +25,8 @@ public class Arena {
     private int timeGames;
     private int timeSeek;
     private int seekersPercent;
+    private int hidersMin;
+    private int seekersMin;
     private GameState state;
     private final List<UUID> participants;
     private final Set<UUID> seekers;
@@ -126,6 +128,22 @@ public class Arena {
 
     public void setSeekersPercent(int seekersPercent) {
         this.seekersPercent = seekersPercent;
+    }
+
+    public int getHidersMin() {
+        return hidersMin;
+    }
+
+    public void setHidersMin(int hidersMin) {
+        this.hidersMin = hidersMin;
+    }
+
+    public int getSeekersMin() {
+        return seekersMin;
+    }
+
+    public void setSeekersMin(int seekersMin) {
+        this.seekersMin = seekersMin;
     }
 
     public GameState getState() {
