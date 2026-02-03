@@ -21,13 +21,12 @@ public class Arena {
     private Location hidenLoc;
     private Location speakerLoc;
     private int timeWaiting;
-    private int prepTime;
     private int timeGames;
     private int timeSeek;
-    private int seekersPercent;
     private int hidersMin;
     private int seekersMin;
     private int minPlayers;
+    private Location lobbyLoc;
     private GameState state;
     private final List<UUID> participants;
     private final Set<UUID> seekers;
@@ -99,14 +98,6 @@ public class Arena {
         this.timeWaiting = timeWaiting;
     }
 
-    public int getPrepTime() {
-        return prepTime;
-    }
-
-    public void setPrepTime(int prepTime) {
-        this.prepTime = prepTime;
-    }
-
     public int getTimeGames() {
         return timeGames;
     }
@@ -121,14 +112,6 @@ public class Arena {
 
     public void setTimeSeek(int timeSeek) {
         this.timeSeek = timeSeek;
-    }
-
-    public int getSeekersPercent() {
-        return seekersPercent;
-    }
-
-    public void setSeekersPercent(int seekersPercent) {
-        this.seekersPercent = seekersPercent;
     }
 
     public int getHidersMin() {
@@ -153,6 +136,14 @@ public class Arena {
 
     public void setMinPlayers(int minPlayers) {
         this.minPlayers = minPlayers;
+    }
+
+    public Location getLobbyLoc() {
+        return lobbyLoc;
+    }
+
+    public void setLobbyLoc(Location lobbyLoc) {
+        this.lobbyLoc = lobbyLoc;
     }
 
     public GameState getState() {

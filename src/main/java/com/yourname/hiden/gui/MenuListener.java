@@ -46,6 +46,7 @@ public class MenuListener implements Listener {
             case ARENA_LIST -> handleArenaList(player, session, event.getSlot());
             case ARENA_SETTINGS -> handleArenaSettings(player, session, event);
             case TIMERS -> handleTimers(player, session, event.getSlot(), event.isLeftClick(), event.isRightClick(), event.isShiftClick());
+            case ACHIEVEMENTS -> handleAchievementsMenu(player, session, event.getSlot());
             default -> {
             }
         }
@@ -141,16 +142,14 @@ public class MenuListener implements Listener {
             case 10 -> Bukkit.dispatchCommand(player, "hiden tp " + arena.getName() + " waiting");
             case 12 -> Bukkit.dispatchCommand(player, "hiden tp " + arena.getName() + " speaker");
             case 14 -> Bukkit.dispatchCommand(player, "hiden tp " + arena.getName() + " hiden");
+            case 16 -> Bukkit.dispatchCommand(player, "hiden tp " + arena.getName() + " lobby");
             case 28 -> Bukkit.dispatchCommand(player, "hiden arena " + arena.getName() + " setwarp waiting");
             case 30 -> Bukkit.dispatchCommand(player, "hiden arena " + arena.getName() + " setwarp speaker");
             case 32 -> Bukkit.dispatchCommand(player, "hiden arena " + arena.getName() + " setwarp hiden");
+            case 34 -> Bukkit.dispatchCommand(player, "hiden arena " + arena.getName() + " setwarp lobby");
+            case 36 -> Bukkit.dispatchCommand(player, "hiden arena " + arena.getName() + " removewarp lobby");
             case 22 -> menuManager.openTimersMenu(player, arena);
-            case 24 -> {
-                menuManager.setPendingInput(player, new PendingInput(InputType.SEEKERS_PERCENT, arena.getName()));
-                player.closeInventory();
-                Msg.send(player, "&eВведи новий відсоток Seek у чат.");
-                Msg.send(player, "&7Напиши &ccancel&7 для скасування.");
-            }
+            case 24 -> menuManager.openAchievementsMenu(player, arena);
             case 26 -> {
                 int value = Math.max(2, Math.min(10, arena.getMinPlayers()));
                 if (event.isLeftClick()) {
@@ -207,28 +206,39 @@ public class MenuListener implements Listener {
         }
         int delta = 0;
         if (left && shift) {
-            delta = 1000;
+            delta = 600;
         } else if (right && shift) {
-            delta = -1000;
+            delta = -600;
         } else if (left) {
-            delta = 100;
+            delta = 200;
         } else if (right) {
-            delta = -100;
+            delta = -200;
         }
         if (delta == 0) {
             return;
         }
         switch (slot) {
-            case 10 -> arena.setPrepTime(Math.max(0, arena.getPrepTime() + delta));
-            case 12 -> arena.setTimeWaiting(Math.max(0, arena.getTimeWaiting() + delta));
-            case 14 -> arena.setTimeGames(Math.max(0, arena.getTimeGames() + delta));
-            case 16 -> arena.setTimeSeek(Math.max(0, arena.getTimeSeek() + delta));
+            case 10 -> arena.setTimeWaiting(Math.max(200, arena.getTimeWaiting() + delta));
+            case 13 -> arena.setTimeGames(Math.max(600, arena.getTimeGames() + delta));
+            case 16 -> arena.setTimeSeek(Math.max(200, arena.getTimeSeek() + delta));
             default -> {
                 return;
             }
         }
         plugin.getArenaManager().save();
         menuManager.openTimersMenu(player, arena);
+    }
+
+    private void handleAchievementsMenu(Player player, MenuSession session, int slot) {
+        Arena arena = plugin.getArenaManager().getArena(session.getArenaName());
+        if (arena == null) {
+            Msg.send(player, "&cАрена не існує!");
+            player.closeInventory();
+            return;
+        }
+        if (slot == 22) {
+            menuManager.openArenaSettings(player, arena);
+        }
     }
 
     private void openRootMenu(Player player) {

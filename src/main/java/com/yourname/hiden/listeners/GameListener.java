@@ -105,7 +105,7 @@ public class GameListener implements Listener {
         if (arena == null) {
             return;
         }
-        if (arena.getState() != GameState.PREP && arena.getState() != GameState.PLAYING) {
+        if (arena.getState() != GameState.WAITING && arena.getState() != GameState.PLAYING) {
             return;
         }
         Location from = event.getFrom();
@@ -127,7 +127,7 @@ public class GameListener implements Listener {
         if (arena == null) {
             return;
         }
-        if (arena.getState() != GameState.PREP && arena.getState() != GameState.PLAYING) {
+        if (arena.getState() != GameState.WAITING && arena.getState() != GameState.PLAYING) {
             return;
         }
         if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {

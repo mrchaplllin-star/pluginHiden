@@ -87,9 +87,7 @@ public class HidenCommand implements CommandExecutor {
         Arena arena = plugin.getArenaManager().createArena(name);
         arena.setTimeWaiting(plugin.getConfig().getInt("default_time_waiting"));
         arena.setTimeGames(plugin.getConfig().getInt("default_time_games"));
-        arena.setPrepTime(plugin.getConfig().getInt("default_prep_time"));
         arena.setTimeSeek(plugin.getConfig().getInt("default_timeseek"));
-        arena.setSeekersPercent(plugin.getConfig().getInt("default_seekers_percent"));
         arena.setHidersMin(plugin.getConfig().getInt("hiders_min"));
         arena.setSeekersMin(plugin.getConfig().getInt("seekers_min"));
         arena.setMinPlayers(plugin.getConfig().getInt("default_min_players", 2));
@@ -148,7 +146,7 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         if (args.length < 4) {
-            Msg.send(sender, "&cВикористання: /hiden arena <name> setwarp <hiden|speaker|waiting>");
+            Msg.send(sender, "&cВикористання: /hiden arena <name> setwarp <hiden|speaker|waiting|lobby>");
             return;
         }
         String type = args[3].toLowerCase(Locale.ROOT);
@@ -158,6 +156,7 @@ public class HidenCommand implements CommandExecutor {
             case "hiden" -> arena.setHidenLoc(loc);
             case "speaker" -> arena.setSpeakerLoc(loc);
             case "waiting" -> arena.setWaitingLoc(loc);
+            case "lobby" -> arena.setLobbyLoc(loc);
             default -> {
                 Msg.send(sender, "&cНевірний тип варпу.");
                 return;
@@ -169,7 +168,7 @@ public class HidenCommand implements CommandExecutor {
 
     private void handleRemoveWarp(CommandSender sender, Arena arena, String[] args) {
         if (args.length < 4) {
-            Msg.send(sender, "&cВикористання: /hiden arena <name> removewarp <hiden|speaker|waiting>");
+            Msg.send(sender, "&cВикористання: /hiden arena <name> removewarp <hiden|speaker|waiting|lobby>");
             return;
         }
         String type = args[3].toLowerCase(Locale.ROOT);
@@ -177,6 +176,7 @@ public class HidenCommand implements CommandExecutor {
             case "hiden" -> arena.setHidenLoc(null);
             case "speaker" -> arena.setSpeakerLoc(null);
             case "waiting" -> arena.setWaitingLoc(null);
+            case "lobby" -> arena.setLobbyLoc(null);
             default -> {
                 Msg.send(sender, "&cНевірний тип варпу.");
                 return;
@@ -188,7 +188,7 @@ public class HidenCommand implements CommandExecutor {
 
     private void handleSettings(CommandSender sender, Arena arena, String[] args) {
         if (args.length < 4) {
-            Msg.send(sender, "&cВикористання: /hiden arena <name> setting prep_time=<ticks> timegames=<ticks> timewaiting=<ticks> seekers_percent=<1-50> timeseek=<ticks> hiders_min=<n> seekers_min=<n>");
+            Msg.send(sender, "&cВикористання: /hiden arena <name> setting timegames=<ticks> timewaiting=<ticks> timeseek=<ticks> hiders_min=<n> seekers_min=<n>");
             return;
         }
         for (int i = 3; i < args.length; i++) {
@@ -201,10 +201,8 @@ public class HidenCommand implements CommandExecutor {
             try {
                 int intValue = Integer.parseInt(value);
                 switch (key) {
-                    case "prep_time" -> arena.setPrepTime(intValue);
                     case "timegames" -> arena.setTimeGames(intValue);
                     case "timewaiting" -> arena.setTimeWaiting(intValue);
-                    case "seekers_percent" -> arena.setSeekersPercent(Math.max(1, Math.min(50, intValue)));
                     case "timeseek" -> arena.setTimeSeek(intValue);
                     case "hiders_min" -> arena.setHidersMin(Math.max(1, intValue));
                     case "seekers_min" -> arena.setSeekersMin(Math.max(1, intValue));
@@ -262,7 +260,7 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         if (args.length < 2) {
-            Msg.send(sender, "&cВикористання: /hiden tp <name> [hiden|speaker|waiting]");
+            Msg.send(sender, "&cВикористання: /hiden tp <name> [hiden|speaker|waiting|lobby]");
             return;
         }
         Arena arena = plugin.getArenaManager().getArena(args[1]);
@@ -279,6 +277,8 @@ public class HidenCommand implements CommandExecutor {
                 target = arena.getSpeakerLoc();
             } else if (warp.equals("waiting")) {
                 target = arena.getWaitingLoc();
+            } else if (warp.equals("lobby")) {
+                target = arena.getLobbyLoc();
             }
         }
         if (target == null) {
@@ -337,7 +337,7 @@ public class HidenCommand implements CommandExecutor {
             Msg.send(sender, "&cКоманда тільки в арені!");
             return;
         }
-        if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
+        if (arena.getState() == GameState.WAITING || arena.getState() == GameState.PLAYING) {
             Msg.send(sender, "&cГра вже запущена!");
             return;
         }
@@ -357,10 +357,10 @@ public class HidenCommand implements CommandExecutor {
             String role = args[3].toLowerCase(Locale.ROOT);
             if (role.equals("hiden")) {
                 plugin.getGameManager().assignHider(arena, player);
-                Msg.send(sender, "&aТи граєш за &fHiden");
+                Msg.send(sender, "&aТи приєднався до команди: &fHiden");
             } else if (role.equals("speaker")) {
                 plugin.getGameManager().assignSeeker(arena, player);
-                Msg.send(sender, "&cТи граєш за &fSeek");
+                Msg.send(sender, "&cТи приєднався до команди: &fSeek");
             } else {
                 Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
                 return;
@@ -469,7 +469,7 @@ public class HidenCommand implements CommandExecutor {
             Msg.send(sender, "&cАрена не знайдена.");
             return;
         }
-        if (arena.getState() != GameState.PREP && arena.getState() != GameState.PLAYING) {
+        if (arena.getState() != GameState.WAITING && arena.getState() != GameState.PLAYING) {
             Msg.send(sender, "&cСпостерігати можна тільки під час гри.");
             return;
         }

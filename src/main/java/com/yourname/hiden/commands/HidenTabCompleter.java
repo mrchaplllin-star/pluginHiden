@@ -83,6 +83,7 @@ public class HidenTabCompleter implements TabCompleter {
                 suggestions.add("hiden");
                 suggestions.add("speaker");
                 suggestions.add("waiting");
+                suggestions.add("lobby");
             }
         }
         if (args.length == 4) {
@@ -97,6 +98,7 @@ public class HidenTabCompleter implements TabCompleter {
                     suggestions.add("hiden");
                     suggestions.add("speaker");
                     suggestions.add("waiting");
+                    suggestions.add("lobby");
                 }
             }
         }

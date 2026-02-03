@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import com.yourname.hiden.util.Msg;
+import com.yourname.hiden.util.SafeTeleport;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -65,11 +66,11 @@ public class GameManager {
         }
         int requiredHiders = arena.getHidersMin() > 0 ? arena.getHidersMin() : plugin.getConfig().getInt("hiders_min");
         int requiredSeekers = arena.getSeekersMin() > 0 ? arena.getSeekersMin() : plugin.getConfig().getInt("seekers_min");
-        if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
+        if (arena.getState() == GameState.WAITING || arena.getState() == GameState.PLAYING) {
             lastError = "&cГра вже запущена.";
             return false;
         }
-        if (arena.getWaitingLoc() == null || arena.getHidenLoc() == null || arena.getSpeakerLoc() == null) {
+        if (arena.getWaitingLoc() == null || arena.getHidenLoc() == null || arena.getSpeakerLoc() == null || arena.getLobbyLoc() == null) {
             lastError = "&cНе всі варпи налаштовані!";
             return false;
         }
@@ -89,8 +90,7 @@ public class GameManager {
         }
         List<UUID> shuffled = new ArrayList<>(arena.getParticipants());
         java.util.Collections.shuffle(shuffled);
-        int seekersCount = Math.max(requiredSeekers,
-                (int) Math.ceil(shuffled.size() * (arena.getSeekersPercent() / 100.0)));
+        int seekersCount = Math.max(1, requiredSeekers);
         seekersCount = Math.min(seekersCount, shuffled.size() - 1);
         boolean manualTeams = !arena.getSeekers().isEmpty() || !arena.getHiders().isEmpty();
         Set<UUID> presetSeekers = new java.util.HashSet<>(arena.getSeekers());
@@ -125,11 +125,21 @@ public class GameManager {
             arena.getHiders().addAll(unassigned);
         }
         syncTeams(arena);
-        for (UUID uuid : arena.getParticipants()) {
+        for (UUID uuid : arena.getSeekers()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 player.setGameMode(GameMode.SURVIVAL);
                 player.teleport(arena.getWaitingLoc());
+            }
+        }
+        for (UUID uuid : arena.getHiders()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                player.setGameMode(GameMode.SURVIVAL);
+                Location safe = SafeTeleport.findSafe(arena.getHidenLoc());
+                if (safe != null) {
+                    player.teleport(safe);
+                }
             }
         }
         GameTask task = new GameTask(plugin, this, arena);
@@ -262,13 +272,24 @@ public class GameManager {
             }
         }
 
+        Location lobby = arena.getLobbyLoc();
+        boolean lobbyMissing = lobby == null;
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
                 player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
                 player.setGameMode(GameMode.SURVIVAL);
-                if (waiting != null) {
-                    player.teleport(waiting);
+                Location target = lobby;
+                if (target == null) {
+                    target = player.getWorld().getSpawnLocation();
+                }
+                player.teleport(target);
+            }
+        }
+        if (lobbyMissing) {
+            for (Player online : Bukkit.getOnlinePlayers()) {
+                if (online.hasPermission("hiden.admin")) {
+                    Msg.send(online, "&eУвага: варп lobby не встановлений, телепортація на спавн.");
                 }
             }
         }

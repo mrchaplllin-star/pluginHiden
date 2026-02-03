@@ -5,5 +5,6 @@ public enum MenuType {
     PLAYER,
     ARENA_LIST,
     ARENA_SETTINGS,
-    TIMERS
+    TIMERS,
+    ACHIEVEMENTS
 }

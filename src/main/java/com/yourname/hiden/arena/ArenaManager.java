@@ -46,10 +46,8 @@ public class ArenaManager {
             arena.setWorld(arenaSection.getString("world"));
             arena.setDisplayName(arenaSection.getString("displayName", key));
             arena.setTimeWaiting(arenaSection.getInt("timeWaiting"));
-            arena.setPrepTime(arenaSection.getInt("prepTime"));
             arena.setTimeGames(arenaSection.getInt("timeGames"));
             arena.setTimeSeek(arenaSection.getInt("timeSeek"));
-            arena.setSeekersPercent(arenaSection.getInt("seekersPercent"));
             arena.setHidersMin(arenaSection.getInt("hidersMin"));
             arena.setSeekersMin(arenaSection.getInt("seekersMin"));
             int defaultMinPlayers = plugin.getConfig().getInt("default_min_players", 2);
@@ -58,9 +56,11 @@ public class ArenaManager {
             Location waiting = LocUtil.deserialize(arenaSection.getString("waitingLoc"));
             Location hiden = LocUtil.deserialize(arenaSection.getString("hidenLoc"));
             Location speaker = LocUtil.deserialize(arenaSection.getString("speakerLoc"));
+            Location lobby = LocUtil.deserialize(arenaSection.getString("lobbyLoc"));
             arena.setWaitingLoc(waiting);
             arena.setHidenLoc(hiden);
             arena.setSpeakerLoc(speaker);
+            arena.setLobbyLoc(lobby);
             arenas.put(key.toLowerCase(), arena);
         }
     }
@@ -72,16 +72,15 @@ public class ArenaManager {
             config.set(path + ".world", arena.getWorld());
             config.set(path + ".displayName", arena.getDisplayName());
             config.set(path + ".timeWaiting", arena.getTimeWaiting());
-            config.set(path + ".prepTime", arena.getPrepTime());
             config.set(path + ".timeGames", arena.getTimeGames());
             config.set(path + ".timeSeek", arena.getTimeSeek());
-            config.set(path + ".seekersPercent", arena.getSeekersPercent());
             config.set(path + ".hidersMin", arena.getHidersMin());
             config.set(path + ".seekersMin", arena.getSeekersMin());
             config.set(path + ".min_players", arena.getMinPlayers());
             config.set(path + ".waitingLoc", LocUtil.serialize(arena.getWaitingLoc()));
             config.set(path + ".hidenLoc", LocUtil.serialize(arena.getHidenLoc()));
             config.set(path + ".speakerLoc", LocUtil.serialize(arena.getSpeakerLoc()));
+            config.set(path + ".lobbyLoc", LocUtil.serialize(arena.getLobbyLoc()));
         }
         try {
             config.save(file);

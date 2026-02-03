@@ -4,15 +4,11 @@ import com.yourname.hiden.Hiden;
 import com.yourname.hiden.arena.Arena;
 import com.yourname.hiden.arena.GameState;
 import com.yourname.hiden.util.Msg;
-import com.yourname.hiden.util.SafeTeleport;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -31,7 +27,7 @@ public class GameTask extends BukkitRunnable {
     private int chickenSoundTicks;
 
     private enum Phase {
-        PREP,
+        WAITING,
         PLAYING
     }
 
@@ -39,17 +35,17 @@ public class GameTask extends BukkitRunnable {
         this.plugin = plugin;
         this.manager = manager;
         this.arena = arena;
-        this.phase = Phase.PREP;
-        this.remainingTicks = Math.max(0, arena.getPrepTime());
+        this.phase = Phase.WAITING;
+        this.remainingTicks = Math.max(0, arena.getTimeWaiting());
         this.hiderGlow = new HashMap<>();
         this.chickenSoundTicks = 0;
-        startPrep();
+        startWaiting();
     }
 
-    private void startPrep() {
-        arena.setState(GameState.PREP);
+    private void startWaiting() {
+        arena.setState(GameState.WAITING);
         BossBar bossBar = arena.getBossBar();
-        bossBar.setTitle(Msg.colorizeText("&eПідготовка"));
+        bossBar.setTitle(Msg.colorizeText("&eОчікування"));
         bossBar.setProgress(1.0);
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
@@ -57,7 +53,7 @@ public class GameTask extends BukkitRunnable {
                 bossBar.addPlayer(player);
             }
         }
-        manager.broadcastToArena(arena, "&eПочаток підготовки! Seek заморожені.");
+        manager.broadcastToArena(arena, "&eПочаток очікування! Hiden ховаються.");
     }
 
     private void startPlaying() {
@@ -77,11 +73,6 @@ public class GameTask extends BukkitRunnable {
         for (UUID uuid : arena.getHiders()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                player.setGameMode(GameMode.SURVIVAL);
-                Location safe = SafeTeleport.findSafe(arena.getHidenLoc());
-                if (safe != null) {
-                    player.teleport(safe);
-                }
                 Msg.send(player, "&aТи Hiden! Ховайся.");
                 hiderGlow.put(uuid, false);
             }
@@ -91,29 +82,22 @@ public class GameTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (phase == Phase.PREP) {
-            handlePrep();
+        if (phase == Phase.WAITING) {
+            handleWaiting();
             return;
         }
         handlePlaying();
     }
 
-    private void handlePrep() {
+    private void handleWaiting() {
         BossBar bossBar = arena.getBossBar();
-        double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getPrepTime()));
-        bossBar.setTitle(Msg.colorizeText("&eПідготовка: &f" + Msg.formatTimeUA(remainingTicks)));
+        double progress = remainingTicks <= 0 ? 0 : Math.min(1.0, remainingTicks / (double) Math.max(1, arena.getTimeWaiting()));
+        bossBar.setTitle(Msg.colorizeText("&eОчікування: &f" + Msg.formatTimeUA(remainingTicks)));
         bossBar.setProgress(progress);
-        for (UUID uuid : arena.getSeekers()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 255, false, false, false));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255, false, false, false));
-            }
-        }
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                Msg.actionBarRaw(player, "&c&lПідготовка: &f" + Msg.formatTimeUA(remainingTicks));
+                Msg.actionBarRaw(player, "&cОчікування: &f" + Msg.formatTimeUA(remainingTicks));
             }
         }
         remainingTicks -= 20;
@@ -134,7 +118,7 @@ public class GameTask extends BukkitRunnable {
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
-                Msg.actionBarRaw(player, "&9&lЧас гри: &f" + Msg.formatTimeUA(remainingTicks));
+                Msg.actionBarRaw(player, "&cГра: &f" + Msg.formatTimeUA(remainingTicks));
             }
         }
 

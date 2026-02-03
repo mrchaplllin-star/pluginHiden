@@ -54,9 +54,9 @@ public class MenuManager {
         inventory.setItem(4, createItem(Material.NETHER_STAR, "&e&lАрени",
                 List.of("&7Перегляд та керування аренами.", "&8Натисни, щоб відкрити список")));
         inventory.setItem(20, createItem(Material.LIME_BANNER, "&a&lПриєднатись як Hiden",
-                List.of("&7Обери арену та грай за Hiden.", "&8Команда: /hiden join <arena> team hiden")));
+                List.of("&7Обери арену та грай за Hiden.", "&8Команда: /hiden join <arena> team hiden (Hiden)")));
         inventory.setItem(22, createItem(Material.RED_BANNER, "&c&lПриєднатись як Seek",
-                List.of("&7Обери арену та грай за Seek.", "&8Команда: /hiden join <arena> team speaker")));
+                List.of("&7Обери арену та грай за Seek.", "&8Команда: /hiden join <arena> team speaker (Seek)")));
         inventory.setItem(24, createItem(Material.SPYGLASS, "&b&lСпостерігати",
                 List.of("&7Спостерігай за активною грою.", "&8Тільки під час гри")));
         inventory.setItem(38, createItem(Material.BOOK, "&e&lСтатистика та рейтинг",
@@ -122,6 +122,7 @@ public class MenuManager {
         inventory.setItem(10, createItem(Material.ENDER_PEARL, "&a&lТелепорт до очікування", List.of("&7Телепортація")));
         inventory.setItem(12, createItem(Material.ENDER_PEARL, "&c&lТелепорт до Seek", List.of("&7Телепортація")));
         inventory.setItem(14, createItem(Material.ENDER_PEARL, "&e&lТелепорт до Hiden", List.of("&7Телепортація")));
+        inventory.setItem(16, createItem(Material.ENDER_PEARL, "&b&lТелепорт до lobby", List.of("&7Телепортація")));
 
         inventory.setItem(28, createItem(Material.WHITE_WOOL, "&a&lВстановити точку очікування",
                 List.of("&7Зберігає твою поточну позицію")));
@@ -129,18 +130,22 @@ public class MenuManager {
                 List.of("&7Зберігає твою поточну позицію")));
         inventory.setItem(32, createItem(Material.WHITE_WOOL, "&e&lВстановити точку Hiden",
                 List.of("&7Зберігає твою поточну позицію")));
+        inventory.setItem(34, createItem(Material.WHITE_WOOL, "&b&lВстановити точку lobby",
+                List.of("&7Зберігає твою поточну позицію")));
+        inventory.setItem(36, createItem(Material.BARRIER, "&c&lВидалити точку lobby",
+                List.of("&7Видаляє lobby варп")));
 
         inventory.setItem(22, createItem(Material.CLOCK, "&e&lНалаштування часу", List.of(
-                "&7Підготовка: &f" + arena.getPrepTime(),
-                "&7Очікування: &f" + arena.getTimeWaiting(),
-                "&7Тривалість гри: &f" + arena.getTimeGames(),
-                "&7Підсвітка Hiden: &f" + arena.getTimeSeek(),
+                "&7Очікування: &f" + Msg.formatTimeUA(arena.getTimeWaiting()),
+                "&7Тривалість гри: &f" + Msg.formatTimeUA(arena.getTimeGames()),
+                "&7Таймер підказки: &f" + Msg.formatTimeUA(arena.getTimeSeek()),
                 " ",
                 "&8Натисни для зміни"
         )));
 
-        inventory.setItem(24, createItem(Material.COMPASS, "&e&lВідсоток Seek", List.of(
-                "&7Поточне значення: &f" + arena.getSeekersPercent() + "%"
+        inventory.setItem(24, createItem(Material.ENCHANTED_BOOK, "&e&lНалаштування досягнень", List.of(
+                "&7Керування досягненнями",
+                "&8Натисни, щоб відкрити"
         )));
 
         int minPlayers = Math.max(2, Math.min(10, arena.getMinPlayers()));
@@ -182,10 +187,32 @@ public class MenuManager {
         Inventory inventory = Bukkit.createInventory(holder, 27, Msg.colorizeText("&6&lHiden &8| &e&lЧасові налаштування"));
         holder.setInventory(inventory);
 
-        inventory.setItem(10, createTimerItem("&e&lЧас підготовки", arena.getPrepTime()));
-        inventory.setItem(12, createTimerItem("&e&lЧас очікування", arena.getTimeWaiting()));
-        inventory.setItem(14, createTimerItem("&e&lТривалість гри", arena.getTimeGames()));
-        inventory.setItem(16, createTimerItem("&e&lПідсвітка Hiden", arena.getTimeSeek()));
+        inventory.setItem(10, createTimerItem("&e&lТривалість очікування", arena.getTimeWaiting()));
+        inventory.setItem(13, createTimerItem("&e&lТривалість гри", arena.getTimeGames()));
+        inventory.setItem(16, createTimerItem("&e&lТаймер підказки", arena.getTimeSeek()));
+        inventory.setItem(22, createItem(Material.ARROW, "&c&lНазад", List.of("&7Повернутись")));
+
+        fillEmpty(inventory);
+        player.openInventory(inventory);
+    }
+
+    public void openAchievementsMenu(Player player, Arena arena) {
+        MenuSession session = new MenuSession(MenuType.ACHIEVEMENTS, arena.getName(), 0, null);
+        MenuHolder holder = new MenuHolder(session);
+        Inventory inventory = Bukkit.createInventory(holder, 27, Msg.colorizeText("&6&lHiden &8| &e&lНалаштування досягнень"));
+        holder.setInventory(inventory);
+
+        inventory.setItem(11, createItem(Material.PAPER, "&e&lСкоро", List.of(
+                "&7Налаштування буде додано",
+                "&7у наступних оновленнях."
+        )));
+        inventory.setItem(13, createItem(Material.BOOK, "&e&lІнформація", List.of(
+                "&7Це меню поки що",
+                "&7не впливає на гру."
+        )));
+        inventory.setItem(15, createItem(Material.BOOKSHELF, "&e&lПараметри", List.of(
+                "&7Доступно найближчим часом."
+        )));
         inventory.setItem(22, createItem(Material.ARROW, "&c&lНазад", List.of("&7Повернутись")));
 
         fillEmpty(inventory);
@@ -194,23 +221,24 @@ public class MenuManager {
 
     private ItemStack createTimerItem(String name, int value) {
         return createItem(Material.CLOCK, name, List.of(
-                "&7Поточне значення: &f" + value,
-                "&aЛКМ: +100",
-                "&cПКМ: -100",
-                "&eShift + клік: ±1000"
+                "&7Поточне значення: &f" + Msg.formatTimeUA(value),
+                "&aЛКМ: +10с",
+                "&cПКМ: -10с",
+                "&eShift + клік: ±30с"
         ));
     }
 
     private ItemStack createArenaItem(Arena arena) {
         String state = switch (arena.getState()) {
             case WAITING -> "Очікування";
-            case PREP -> "Підготовка";
+            case PREP -> "Очікування";
             case PLAYING -> "Гра";
             case ENDED -> "Завершено";
         };
         String wait = arena.getWaitingLoc() != null ? "&a✓" : "&c✗";
         String hiden = arena.getHidenLoc() != null ? "&a✓" : "&c✗";
         String speaker = arena.getSpeakerLoc() != null ? "&a✓" : "&c✗";
+        String lobby = arena.getLobbyLoc() != null ? "&a✓" : "&c✗";
 
         List<String> lore = new ArrayList<>();
         lore.add("&7ID арени: &f" + arena.getName());
@@ -221,6 +249,7 @@ public class MenuManager {
         lore.add("&7Точка очікування: " + wait);
         lore.add("&7Точка Hiden: " + hiden);
         lore.add("&7Точка Seek: " + speaker);
+        lore.add("&7Точка lobby: " + lobby);
         lore.add(" ");
         lore.add("&8Натисни для налаштувань");
         return createItem(Material.MAP, "&e&l" + arena.getDisplayName(), lore);
@@ -272,20 +301,6 @@ public class MenuManager {
             clearPendingInput(player);
             Msg.send(player, "&aНазву арени оновлено.");
             openArenaSettings(player, arena);
-            return;
-        }
-        if (input.getType() == InputType.SEEKERS_PERCENT) {
-            try {
-                int value = Integer.parseInt(message);
-                value = Math.max(1, Math.min(50, value));
-                arena.setSeekersPercent(value);
-                plugin.getArenaManager().save();
-                clearPendingInput(player);
-                Msg.send(player, "&aВідсоток Seek оновлено.");
-                openArenaSettings(player, arena);
-            } catch (NumberFormatException e) {
-                Msg.send(player, "&cВведи число від 1 до 50.");
-            }
         }
     }
 }
