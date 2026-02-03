@@ -75,6 +75,9 @@ public class GameManager {
         }
         int minPlayers = arena.getMinPlayers() > 0 ? arena.getMinPlayers() : plugin.getConfig().getInt("default_min_players", 2);
         minPlayers = Math.max(2, Math.min(10, minPlayers));
+        int maxTeam = Math.max(1, minPlayers - 1);
+        requiredHiders = Math.max(1, Math.min(requiredHiders, maxTeam));
+        requiredSeekers = Math.max(1, Math.min(requiredSeekers, maxTeam));
         if (arena.getParticipants().size() < minPlayers) {
             lastError = "&cНедостатньо гравців для старту гри!\n&7Мінімум: &f" + minPlayers
                     + "\n&7Зараз: &f" + arena.getParticipants().size();

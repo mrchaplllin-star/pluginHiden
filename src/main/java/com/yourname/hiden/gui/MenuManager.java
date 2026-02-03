@@ -5,6 +5,7 @@ import com.yourname.hiden.arena.Arena;
 import com.yourname.hiden.arena.GameState;
 import com.yourname.hiden.util.Msg;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -229,10 +230,10 @@ public class MenuManager {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Msg.colorize(name));
+            meta.displayName(Msg.colorize(name).decoration(TextDecoration.ITALIC, false));
             List<Component> loreComponents = new ArrayList<>();
             for (String line : lore) {
-                loreComponents.add(Msg.colorize(line));
+                loreComponents.add(Msg.colorize(line).decoration(TextDecoration.ITALIC, false));
             }
             meta.lore(loreComponents);
             item.setItemMeta(meta);
