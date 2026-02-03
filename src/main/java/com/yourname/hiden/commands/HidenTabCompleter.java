@@ -70,8 +70,7 @@ public class HidenTabCompleter implements TabCompleter {
         if (args.length == 3) {
             String sub = args[0].toLowerCase(Locale.ROOT);
             if (sub.equals("join")) {
-                suggestions.add("hiden");
-                suggestions.add("speaker");
+                suggestions.add("team");
             }
             if (sub.equals("arena")) {
                 suggestions.add("setwarp");
@@ -85,12 +84,19 @@ public class HidenTabCompleter implements TabCompleter {
                 suggestions.add("waiting");
             }
         }
-        if (args.length == 4 && args[0].equalsIgnoreCase("arena")) {
-            String action = args[2].toLowerCase(Locale.ROOT);
-            if (action.equals("setwarp") || action.equals("removewarp")) {
+        if (args.length == 4) {
+            String sub = args[0].toLowerCase(Locale.ROOT);
+            if (sub.equals("join") && args[2].equalsIgnoreCase("team")) {
                 suggestions.add("hiden");
                 suggestions.add("speaker");
-                suggestions.add("waiting");
+            }
+            if (args[0].equalsIgnoreCase("arena")) {
+                String action = args[2].toLowerCase(Locale.ROOT);
+                if (action.equals("setwarp") || action.equals("removewarp")) {
+                    suggestions.add("hiden");
+                    suggestions.add("speaker");
+                    suggestions.add("waiting");
+                }
             }
         }
         return suggestions;

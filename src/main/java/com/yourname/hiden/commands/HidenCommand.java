@@ -58,7 +58,7 @@ public class HidenCommand implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        Msg.send(sender, "&e/hiden join <arena> &7- приєднатись");
+        Msg.send(sender, "&e/hiden join <arena> [team <hiden|speaker>] &7- приєднатись");
         Msg.send(sender, "&e/hiden leave &7- вийти");
         Msg.send(sender, "&e/hiden stats [гравець] &7- статистика");
         Msg.send(sender, "&e/hiden achievements &7- досягнення");
@@ -308,37 +308,52 @@ public class HidenCommand implements CommandExecutor {
             Msg.send(sender, "&cТільки для гравця.");
             return;
         }
-        if (!player.hasPermission("hiden.join")) {
+        if (!player.hasPermission("hiden.join") && !player.hasPermission("hiden.admin")) {
             Msg.send(sender, "&cНемає прав.");
             return;
         }
         if (args.length < 2) {
-            Msg.send(sender, "&cВикористання: /hiden join <arena> [hiden|speaker]");
+            Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
             return;
         }
         Arena arena = plugin.getArenaManager().getArena(args[1]);
         if (arena == null) {
-            Msg.send(sender, "&cАрена не знайдена.");
+            Msg.send(sender, "&cArena does not exist!");
             return;
         }
-        if (!isPlayerInArenaWorld(player, arena)) {
+        if (!isPlayerInArenaWorld(player, arena) && !player.hasPermission("hiden.admin")) {
             Msg.send(sender, "&cКоманда тільки в арені!");
             return;
         }
-        if (arena.getParticipants().contains(player.getUniqueId())) {
-            Msg.send(sender, "&eВи вже в арені.");
+        if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
+            Msg.send(sender, "&cGame already started!");
             return;
         }
-        arena.getParticipants().add(player.getUniqueId());
+        boolean alreadyParticipant = arena.getParticipants().contains(player.getUniqueId());
+        if (!alreadyParticipant) {
+            arena.getParticipants().add(player.getUniqueId());
+        }
         if (args.length >= 3) {
-            String role = args[2].toLowerCase(Locale.ROOT);
-            if (role.equals("hiden")) {
-                arena.getHiders().add(player.getUniqueId());
-                arena.getSeekers().remove(player.getUniqueId());
-            } else if (role.equals("speaker")) {
-                arena.getSeekers().add(player.getUniqueId());
-                arena.getHiders().remove(player.getUniqueId());
+            if (!"team".equalsIgnoreCase(args[2])) {
+                Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
+                return;
             }
+            if (args.length < 4) {
+                Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
+                return;
+            }
+            String role = args[3].toLowerCase(Locale.ROOT);
+            if (role.equals("hiden")) {
+                plugin.getGameManager().assignHider(arena, player);
+            } else if (role.equals("speaker")) {
+                plugin.getGameManager().assignSeeker(arena, player);
+            } else {
+                Msg.send(sender, "&cВикористання: /hiden join <arena> team <hiden|speaker>");
+                return;
+            }
+        } else if (alreadyParticipant) {
+            Msg.send(sender, "&eВи вже в арені.");
+            return;
         }
         plugin.getArenaManager().save();
         Msg.send(sender, "&aВи приєдналися до арени &f" + arena.getDisplayName());
@@ -371,6 +386,7 @@ public class HidenCommand implements CommandExecutor {
         arena.getParticipants().remove(player.getUniqueId());
         arena.getSeekers().remove(player.getUniqueId());
         arena.getHiders().remove(player.getUniqueId());
+        plugin.getGameManager().removeFromTeams(arena, player);
         plugin.getArenaManager().save();
         player.setGameMode(GameMode.SURVIVAL);
         World world = player.getWorld();

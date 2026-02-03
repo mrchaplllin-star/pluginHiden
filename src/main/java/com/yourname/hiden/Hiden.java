@@ -44,6 +44,7 @@ public class Hiden extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        gameManager.clearAllTeams();
         arenaManager.save();
         statsManager.save();
     }

@@ -6,6 +6,8 @@ import com.yourname.hiden.arena.ArenaManager;
 import com.yourname.hiden.arena.GameState;
 import com.yourname.hiden.stats.PlayerStats;
 import com.yourname.hiden.stats.StatsManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import com.yourname.hiden.util.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -14,6 +16,8 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -29,6 +33,8 @@ public class GameManager {
     private final StatsManager statsManager;
     private final Map<String, GameTask> tasks;
     private final Map<String, BukkitTask> taskHandles;
+    private final Map<String, Team> hidenTeams;
+    private final Map<String, Team> speakerTeams;
 
     public GameManager(Hiden plugin, ArenaManager arenaManager, StatsManager statsManager) {
         this.plugin = plugin;
@@ -36,6 +42,8 @@ public class GameManager {
         this.statsManager = statsManager;
         this.tasks = new HashMap<>();
         this.taskHandles = new HashMap<>();
+        this.hidenTeams = new HashMap<>();
+        this.speakerTeams = new HashMap<>();
     }
 
     public Arena getArenaByPlayer(UUID uuid) {
@@ -65,6 +73,7 @@ public class GameManager {
         int seekersCount = Math.max(plugin.getConfig().getInt("seekers_min"),
                 (int) Math.ceil(shuffled.size() * (arena.getSeekersPercent() / 100.0)));
         seekersCount = Math.min(seekersCount, shuffled.size() - 1);
+        boolean manualTeams = !arena.getSeekers().isEmpty() || !arena.getHiders().isEmpty();
         Set<UUID> presetSeekers = new java.util.HashSet<>(arena.getSeekers());
         Set<UUID> presetHiders = new java.util.HashSet<>(arena.getHiders());
         presetSeekers.retainAll(arena.getParticipants());
@@ -80,10 +89,21 @@ public class GameManager {
         unassigned.removeAll(arena.getSeekers());
         unassigned.removeAll(arena.getHiders());
 
-        while (arena.getSeekers().size() < seekersCount && !unassigned.isEmpty()) {
-            arena.getSeekers().add(unassigned.remove(0));
+        if (manualTeams) {
+            if (arena.getHiders().size() < plugin.getConfig().getInt("hiders_min")) {
+                return false;
+            }
+            if (arena.getSeekers().size() < plugin.getConfig().getInt("seekers_min")) {
+                return false;
+            }
+            arena.getHiders().addAll(unassigned);
+        } else {
+            while (arena.getSeekers().size() < seekersCount && !unassigned.isEmpty()) {
+                arena.getSeekers().add(unassigned.remove(0));
+            }
+            arena.getHiders().addAll(unassigned);
         }
-        arena.getHiders().addAll(unassigned);
+        syncTeams(arena);
         for (UUID uuid : arena.getParticipants()) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
@@ -228,8 +248,10 @@ public class GameManager {
             }
         }
 
+        clearTeams(arena);
         arena.getSeekers().clear();
         arena.getHiders().clear();
+        arena.getParticipants().clear();
         arena.setState(GameState.WAITING);
         statsManager.save();
     }
@@ -266,6 +288,131 @@ public class GameManager {
         for (Player online : Bukkit.getOnlinePlayers()) {
             player.showPlayer(plugin, online);
         }
+    }
+
+    public void assignHider(Arena arena, Player player) {
+        if (arena == null || player == null) {
+            return;
+        }
+        arena.getParticipants().add(player.getUniqueId());
+        arena.getHiders().add(player.getUniqueId());
+        arena.getSeekers().remove(player.getUniqueId());
+        Team hidenTeam = getOrCreateTeam(arena, true);
+        Team speakerTeam = getOrCreateTeam(arena, false);
+        if (speakerTeam != null) {
+            speakerTeam.removePlayer(player);
+        }
+        if (hidenTeam != null) {
+            hidenTeam.addPlayer(player);
+        }
+    }
+
+    public void assignSeeker(Arena arena, Player player) {
+        if (arena == null || player == null) {
+            return;
+        }
+        arena.getParticipants().add(player.getUniqueId());
+        arena.getSeekers().add(player.getUniqueId());
+        arena.getHiders().remove(player.getUniqueId());
+        Team hidenTeam = getOrCreateTeam(arena, true);
+        Team speakerTeam = getOrCreateTeam(arena, false);
+        if (hidenTeam != null) {
+            hidenTeam.removePlayer(player);
+        }
+        if (speakerTeam != null) {
+            speakerTeam.addPlayer(player);
+        }
+    }
+
+    public void removeFromTeams(Arena arena, Player player) {
+        if (arena == null || player == null) {
+            return;
+        }
+        Team hidenTeam = getOrCreateTeam(arena, true);
+        Team speakerTeam = getOrCreateTeam(arena, false);
+        if (hidenTeam != null) {
+            hidenTeam.removePlayer(player);
+        }
+        if (speakerTeam != null) {
+            speakerTeam.removePlayer(player);
+        }
+    }
+
+    public void clearTeams(Arena arena) {
+        if (arena == null) {
+            return;
+        }
+        Team hidenTeam = getOrCreateTeam(arena, true);
+        Team speakerTeam = getOrCreateTeam(arena, false);
+        if (hidenTeam != null) {
+            new java.util.HashSet<>(hidenTeam.getEntries()).forEach(hidenTeam::removeEntry);
+        }
+        if (speakerTeam != null) {
+            new java.util.HashSet<>(speakerTeam.getEntries()).forEach(speakerTeam::removeEntry);
+        }
+    }
+
+    public void clearAllTeams() {
+        for (Arena arena : arenaManager.getArenas()) {
+            clearTeams(arena);
+        }
+    }
+
+    public void syncTeams(Arena arena) {
+        if (arena == null) {
+            return;
+        }
+        clearTeams(arena);
+        Team hidenTeam = getOrCreateTeam(arena, true);
+        Team speakerTeam = getOrCreateTeam(arena, false);
+        for (UUID uuid : arena.getHiders()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && hidenTeam != null) {
+                hidenTeam.addPlayer(player);
+            }
+        }
+        for (UUID uuid : arena.getSeekers()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null && speakerTeam != null) {
+                speakerTeam.addPlayer(player);
+            }
+        }
+    }
+
+    private Team getOrCreateTeam(Arena arena, boolean hiden) {
+        if (arena == null) {
+            return null;
+        }
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        String key = arena.getName().toLowerCase();
+        Map<String, Team> map = hiden ? hidenTeams : speakerTeams;
+        Team team = map.get(key);
+        if (team == null) {
+            String name = buildTeamName(arena.getName(), hiden ? "hiden" : "speaker");
+            team = scoreboard.getTeam(name);
+            if (team == null) {
+                team = scoreboard.registerNewTeam(name);
+            }
+            if (hiden) {
+                team.prefix(Component.text("[HIDEN] ").color(NamedTextColor.GREEN));
+                team.color(NamedTextColor.GREEN);
+            } else {
+                team.prefix(Component.text("[SPEAKER] ").color(NamedTextColor.RED));
+                team.color(NamedTextColor.RED);
+            }
+            map.put(key, team);
+        }
+        return team;
+    }
+
+    private String buildTeamName(String arenaName, String type) {
+        String base = type + "_" + arenaName.toLowerCase();
+        if (base.length() <= 16) {
+            return base;
+        }
+        int hash = Math.abs(arenaName.toLowerCase().hashCode());
+        String trimmed = type + "_" + Integer.toString(hash, 36);
+        return trimmed.substring(0, Math.min(16, trimmed.length()));
     }
 
     public StatsManager getStatsManager() {

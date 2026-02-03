@@ -93,6 +93,7 @@ public class GameListener implements Listener {
         arena.getParticipants().remove(player.getUniqueId());
         arena.getSeekers().remove(player.getUniqueId());
         arena.getHiders().remove(player.getUniqueId());
+        manager.removeFromTeams(arena, player);
         manager.checkWin(arena);
         plugin.getArenaManager().save();
     }
