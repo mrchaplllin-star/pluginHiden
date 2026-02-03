@@ -52,6 +52,9 @@ public class ArenaManager {
             arena.setSeekersPercent(arenaSection.getInt("seekersPercent"));
             arena.setHidersMin(arenaSection.getInt("hidersMin"));
             arena.setSeekersMin(arenaSection.getInt("seekersMin"));
+            int defaultMinPlayers = plugin.getConfig().getInt("default_min_players", 2);
+            int minPlayers = arenaSection.getInt("min_players", defaultMinPlayers);
+            arena.setMinPlayers(clamp(minPlayers, 2, 10));
             Location waiting = LocUtil.deserialize(arenaSection.getString("waitingLoc"));
             Location hiden = LocUtil.deserialize(arenaSection.getString("hidenLoc"));
             Location speaker = LocUtil.deserialize(arenaSection.getString("speakerLoc"));
@@ -75,6 +78,7 @@ public class ArenaManager {
             config.set(path + ".seekersPercent", arena.getSeekersPercent());
             config.set(path + ".hidersMin", arena.getHidersMin());
             config.set(path + ".seekersMin", arena.getSeekersMin());
+            config.set(path + ".min_players", arena.getMinPlayers());
             config.set(path + ".waitingLoc", LocUtil.serialize(arena.getWaitingLoc()));
             config.set(path + ".hidenLoc", LocUtil.serialize(arena.getHidenLoc()));
             config.set(path + ".speakerLoc", LocUtil.serialize(arena.getSpeakerLoc()));
@@ -105,5 +109,9 @@ public class ArenaManager {
 
     public Collection<Arena> getArenas() {
         return new ArrayList<>(arenas.values());
+    }
+
+    private int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

@@ -27,6 +27,7 @@ public class Arena {
     private int seekersPercent;
     private int hidersMin;
     private int seekersMin;
+    private int minPlayers;
     private GameState state;
     private final List<UUID> participants;
     private final Set<UUID> seekers;
@@ -144,6 +145,14 @@ public class Arena {
 
     public void setSeekersMin(int seekersMin) {
         this.seekersMin = seekersMin;
+    }
+
+    public int getMinPlayers() {
+        return minPlayers;
+    }
+
+    public void setMinPlayers(int minPlayers) {
+        this.minPlayers = minPlayers;
     }
 
     public GameState getState() {

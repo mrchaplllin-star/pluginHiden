@@ -92,6 +92,7 @@ public class HidenCommand implements CommandExecutor {
         arena.setSeekersPercent(plugin.getConfig().getInt("default_seekers_percent"));
         arena.setHidersMin(plugin.getConfig().getInt("hiders_min"));
         arena.setSeekersMin(plugin.getConfig().getInt("seekers_min"));
+        arena.setMinPlayers(plugin.getConfig().getInt("default_min_players", 2));
         plugin.getArenaManager().save();
         Msg.send(sender, "&aАрена створена: &f" + name);
     }

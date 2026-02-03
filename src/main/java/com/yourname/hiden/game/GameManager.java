@@ -72,6 +72,13 @@ public class GameManager {
             lastError = "&cНе всі точки телепортації встановлені!";
             return false;
         }
+        int minPlayers = arena.getMinPlayers() > 0 ? arena.getMinPlayers() : plugin.getConfig().getInt("default_min_players", 2);
+        minPlayers = Math.max(2, Math.min(10, minPlayers));
+        if (arena.getParticipants().size() < minPlayers) {
+            lastError = "&cНедостатньо гравців для старту гри!\n&7Мінімум: &f" + minPlayers
+                    + "\n&7Зараз: &f" + arena.getParticipants().size();
+            return false;
+        }
         if (arena.getParticipants().size() < requiredHiders) {
             lastError = "&cНедостатньо гравців для старту.";
             return false;

@@ -142,15 +142,28 @@ public class MenuManager {
                 "&7Поточне значення: &f" + arena.getSeekersPercent() + "%"
         )));
 
+        int minPlayers = Math.max(2, Math.min(10, arena.getMinPlayers()));
+        inventory.setItem(26, createItem(Material.ARMOR_STAND, "&eМінімальна кількість гравців", List.of(
+                "&7Поточне значення: &f" + minPlayers,
+                " ",
+                "&aЛКМ: +1",
+                "&cПКМ: -1",
+                "&8Діапазон: 2 – 10"
+        )));
+
         inventory.setItem(40, createItem(Material.NAME_TAG, "&eНазва арени", List.of(
                 "&7Поточна: &f" + arena.getDisplayName(),
                 "&8Натисни, щоб змінити"
         )));
 
-        inventory.setItem(45, createItem(Material.EMERALD_BLOCK, "&aЗапустити гру", List.of(
-                "&7Перевіряє налаштування",
-                "&7та запускає арену"
-        )));
+        List<String> startLore = new ArrayList<>();
+        startLore.add("&7Перевіряє налаштування");
+        startLore.add("&7та запускає арену");
+        if (arena.getParticipants().size() < minPlayers) {
+            startLore.add(" ");
+            startLore.add("&cНедостатньо гравців!");
+        }
+        inventory.setItem(45, createItem(Material.EMERALD_BLOCK, "&aЗапустити гру", startLore));
 
         inventory.setItem(53, createItem(Material.BARRIER, "&cВидалити арену", List.of(
                 "&cУВАГА: дію не можна скасувати"

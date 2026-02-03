@@ -44,7 +44,7 @@ public class MenuListener implements Listener {
             case MAIN -> handleMainMenu(player, event.getSlot());
             case PLAYER -> handlePlayerMenu(player, event.getSlot());
             case ARENA_LIST -> handleArenaList(player, session, event.getSlot());
-            case ARENA_SETTINGS -> handleArenaSettings(player, session, event.getSlot());
+            case ARENA_SETTINGS -> handleArenaSettings(player, session, event);
             case TIMERS -> handleTimers(player, session, event.getSlot(), event.isLeftClick(), event.isRightClick(), event.isShiftClick());
             default -> {
             }
@@ -125,7 +125,8 @@ public class MenuListener implements Listener {
         }
     }
 
-    private void handleArenaSettings(Player player, MenuSession session, int slot) {
+    private void handleArenaSettings(Player player, MenuSession session, InventoryClickEvent event) {
+        int slot = event.getSlot();
         if (!player.hasPermission("hiden.admin")) {
             Msg.send(player, "&cНемає прав.");
             return;
@@ -149,6 +150,28 @@ public class MenuListener implements Listener {
                 player.closeInventory();
                 Msg.send(player, "&eВведи новий відсоток шукачів у чат.");
                 Msg.send(player, "&7Напиши &ccancel&7 для скасування.");
+            }
+            case 26 -> {
+                int value = Math.max(2, Math.min(10, arena.getMinPlayers()));
+                if (event.isLeftClick()) {
+                    if (value >= 10) {
+                        Msg.send(player, "&cМінімальна кількість гравців не може бути більшою за 10");
+                        return;
+                    }
+                    arena.setMinPlayers(value + 1);
+                    plugin.getArenaManager().save();
+                    Msg.send(player, "&aМінімальну кількість гравців змінено на &f" + arena.getMinPlayers());
+                    menuManager.openArenaSettings(player, arena);
+                } else if (event.isRightClick()) {
+                    if (value <= 2) {
+                        Msg.send(player, "&cМінімальна кількість гравців не може бути меншою за 2");
+                        return;
+                    }
+                    arena.setMinPlayers(value - 1);
+                    plugin.getArenaManager().save();
+                    Msg.send(player, "&aМінімальну кількість гравців змінено на &f" + arena.getMinPlayers());
+                    menuManager.openArenaSettings(player, arena);
+                }
             }
             case 40 -> {
                 menuManager.setPendingInput(player, new PendingInput(InputType.DISPLAY_NAME, arena.getName()));
