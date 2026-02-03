@@ -35,6 +35,7 @@ public class GameManager {
     private final Map<String, BukkitTask> taskHandles;
     private final Map<String, Team> hidenTeams;
     private final Map<String, Team> speakerTeams;
+    private String lastError;
 
     public GameManager(Hiden plugin, ArenaManager arenaManager, StatsManager statsManager) {
         this.plugin = plugin;
@@ -56,16 +57,21 @@ public class GameManager {
     }
 
     public boolean startGame(Arena arena) {
+        lastError = null;
         if (arena == null) {
+            lastError = "&cАрена не знайдена.";
             return false;
         }
         if (arena.getState() == GameState.PREP || arena.getState() == GameState.PLAYING) {
+            lastError = "&cГра вже запущена.";
             return false;
         }
         if (arena.getWaitingLoc() == null || arena.getHidenLoc() == null || arena.getSpeakerLoc() == null) {
+            lastError = "&cВарпи не встановлені.";
             return false;
         }
         if (arena.getParticipants().size() < plugin.getConfig().getInt("hiders_min")) {
+            lastError = "&cНедостатньо гравців для старту.";
             return false;
         }
         List<UUID> shuffled = new ArrayList<>(arena.getParticipants());
@@ -91,9 +97,11 @@ public class GameManager {
 
         if (manualTeams) {
             if (arena.getHiders().size() < plugin.getConfig().getInt("hiders_min")) {
+                lastError = "&cНедостатньо ховальників для старту.";
                 return false;
             }
             if (arena.getSeekers().size() < plugin.getConfig().getInt("seekers_min")) {
+                lastError = "&cНедостатньо шукачів для старту.";
                 return false;
             }
             arena.getHiders().addAll(unassigned);
@@ -116,6 +124,10 @@ public class GameManager {
         tasks.put(arena.getName().toLowerCase(), task);
         taskHandles.put(arena.getName().toLowerCase(), handle);
         return true;
+    }
+
+    public String getLastError() {
+        return lastError;
     }
 
     public void stopGame(Arena arena) {

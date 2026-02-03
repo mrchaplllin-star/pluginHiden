@@ -297,7 +297,12 @@ public class HidenCommand implements CommandExecutor {
             return;
         }
         if (!plugin.getGameManager().startGame(arena)) {
-            Msg.send(sender, "&cНе вдалося стартувати гру.");
+            String error = plugin.getGameManager().getLastError();
+            if (error != null) {
+                Msg.send(sender, error);
+            } else {
+                Msg.send(sender, "&cНе вдалося стартувати гру.");
+            }
             return;
         }
         Msg.send(sender, "&aГру запущено.");
