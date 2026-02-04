@@ -1,0 +1,18 @@
+name: Hiden
+version: 1.0
+main: com.yourname.hiden.Hiden
+api-version: "1.21"
+commands:
+  hiden:
+    description: Hiden hide&seek
+    usage: /hiden
+    aliases: [hiden]
+permissions:
+  hiden.admin:
+    default: op
+  hiden.join:
+    default: true
+  hiden.stats:
+    default: true
+  hiden.spectate:
+    default: true

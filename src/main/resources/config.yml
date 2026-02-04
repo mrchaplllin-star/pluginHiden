@@ -1,0 +1,7 @@
+default_time_waiting: 1200
+default_time_games: 12000
+default_timeseek: 2400
+default_min_players: 2
+seekers_min: 1
+hiders_min: 2
+autosave_ticks: 6000
